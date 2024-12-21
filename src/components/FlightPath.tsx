@@ -2,7 +2,11 @@ import { useRef, useMemo, useState } from "react";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
 import { TravelLocation } from "../types/travel";
-import { latLongToVector3 } from "../utils/coordinates";
+import {
+  calculateDistance,
+  latLongToVector3,
+  scaleValue,
+} from "../utils/coordinates";
 import { createPortal } from "react-dom";
 
 interface FlightPathProps {
@@ -21,17 +25,26 @@ export function FlightPath({ from, to, progress, rotation }: FlightPathProps) {
   } | null>(null);
 
   const points = useMemo(() => {
-    console.log(from.city, to.city, from.coordinates, to.coordinates);
+    // console.log(from.city, to.city, from.coordinates, to.coordinates);
     const start = latLongToVector3(from.coordinates[0], from.coordinates[1]);
     const end = latLongToVector3(to.coordinates[0], to.coordinates[1]);
 
-    // TODO Fix this the coordinates are not correct after this
+    const distance = calculateDistance(
+      from.coordinates[0],
+      from.coordinates[1],
+      to.coordinates[0],
+      to.coordinates[1]
+    );
+
+    console.log(distance);
+
+    const scaledDistance = scaleValue(distance, 67573, 15234441, 1.1, 2);
 
     const midPoint = new THREE.Vector3()
       .addVectors(start, end)
-      .multiplyScalar(0.5)
+      .multiplyScalar(0.5) // Get the middle point of the flight path
       .normalize()
-      .multiplyScalar(1.5);
+      .multiplyScalar(scaledDistance); // Height of the flight path
 
     curveRef.current = new THREE.QuadraticBezierCurve3(start, midPoint, end);
     return curveRef.current.getPoints(5);
@@ -50,8 +63,6 @@ export function FlightPath({ from, to, progress, rotation }: FlightPathProps) {
         2
       )}`
     );
-    // console.log(typeof event);
-    // console.log(event);
     console.log("To city:", to.city);
     // TODO Fix this
     // setTooltipPosition({ x: event.clientX, y: event.clientY });

@@ -1,6 +1,8 @@
 import { latLongToVector3 } from './coordinates';
 import * as THREE from 'three';
 
+
+// TODO fix
 describe('latLongToVector3', () => {
   it('should convert latitude and longitude to a THREE.Vector3', () => {
     const vector = latLongToVector3(0, 0);

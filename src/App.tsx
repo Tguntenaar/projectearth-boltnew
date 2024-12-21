@@ -86,8 +86,8 @@ export default function App() {
           <Stars radius={300} depth={60} count={20000} factor={7} fade />
           <Earth rotation={rotation} />
 
-          <group ref={arrowGroupRef} />
-
+          {/* <group ref={arrowGroupRef} />
+`
           <Text position={[1.1, 0, 0]} fontSize={0.1} color="blue">
             X
           </Text>
@@ -96,7 +96,7 @@ export default function App() {
           </Text>
           <Text position={[0, 0, 1.1]} fontSize={0.1} color="green">
             Z
-          </Text>
+          </Text> */}
 
           {travelData.slice(0, -1).map((location, index) => (
             <React.Fragment key={index}>
