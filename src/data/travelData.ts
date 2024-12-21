@@ -46,7 +46,7 @@ export const travelData: TravelLocation[] = [
   { city: "Austin", country: "USA", coordinates: [30.2672, -97.7431], date: "2024-09-01" },
   { city: "Boston", country: "USA", coordinates: [42.3601, -71.0589], date: "2024-09-05" },
   { city: "New York", country: "USA", coordinates: [40.7128, -74.0060], date: "2024-10-10" },
-  { city: "Boca Chica", country: "Dominican Republic", coordinates: [18.4503, -69.6063], date: "2024-10-12" },
+  { city: "Boca Chica", country: "USA", coordinates: [25.4503, -97.6063], date: "2024-10-12" },
   { city: "Bangkok", country: "Thailand", coordinates: [13.7563, 100.5018], date: "2024-11-05" },
   { city: "San Jose", country: "USA", coordinates: [37.3382, -121.8863], date: "2024-11-14" },
   { city: "San Francisco", country: "USA", coordinates: [37.7749, -122.4194], date: "2024-11-29" },
