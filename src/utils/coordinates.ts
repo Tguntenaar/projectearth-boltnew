@@ -1,5 +1,14 @@
 import * as THREE from 'three';
 
+
+/**
+ * TODO the coordinates this returns need to be corrected in flight path
+ * rotated.applyAxisAngle(new THREE.Vector3(0, -1, 0), rotation);
+ * rotated.x = -rotated.x;
+ * @param lat 
+ * @param long 
+ * @returns 
+ */
 export function latLongToVector3(lat: number, long: number): THREE.Vector3 {
   const phi = (90 - lat) * (Math.PI / 180);
   const theta = (long + 180) * (Math.PI / 180);

@@ -86,6 +86,15 @@ export function FlightPath({ from, to, progress, rotation }: FlightPathProps) {
       />
 
       <mesh
+        position={rotatedPoints[0]}
+        onPointerOver={(event) => handlePointerOver(event, rotatedPoints[0])}
+        onPointerOut={handlePointerOut}
+      >
+        <sphereGeometry args={[0.01, 8, 8]} />
+        <meshBasicMaterial color="red" />
+      </mesh>
+
+      <mesh
         position={rotatedPoints[rotatedPoints.length - 1]}
         onPointerOver={(event) =>
           handlePointerOver(event, rotatedPoints[rotatedPoints.length - 1])

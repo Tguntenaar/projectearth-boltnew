@@ -51,7 +51,7 @@ export default function App() {
 
   React.useEffect(() => {
     let animationFrame: number;
-    const speed = 0.001; // Base speed
+    const speed = 0.011; // Base speed
 
     const animate = () => {
       setSegmentProgress((prev) => {
@@ -85,9 +85,7 @@ export default function App() {
           <SceneLighting />
           <Stars radius={300} depth={60} count={20000} factor={7} fade />
           <Earth rotation={rotation} />
-
-          {/* <group ref={arrowGroupRef} />
-`
+          <group ref={arrowGroupRef} />`
           <Text position={[1.1, 0, 0]} fontSize={0.1} color="blue">
             X
           </Text>
@@ -96,26 +94,23 @@ export default function App() {
           </Text>
           <Text position={[0, 0, 1.1]} fontSize={0.1} color="green">
             Z
-          </Text> */}
-
+          </Text>
           {travelData.slice(0, -1).map((location, index) => (
             <React.Fragment key={index}>
               <FlightPath
-                from={location}
-                to={travelData[index + 1]}
-                progress={index === currentSegment ? segmentProgress : 0}
+                from={travelData[currentSegment]}
+                to={travelData[currentSegment + 1]}
+                progress={segmentProgress}
                 rotation={rotation}
               />
             </React.Fragment>
           ))}
-
           <TravelingLight
             from={currentFrom}
             to={currentTo}
             progress={segmentProgress}
             rotation={rotation}
           />
-
           <OrbitControls
             enableZoom={true}
             enablePan={true}

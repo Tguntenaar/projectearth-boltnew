@@ -1,4 +1,5 @@
 export interface TravelLocation {
+  id: number;
   city: string;
   country: string;
   coordinates: [number, number];
