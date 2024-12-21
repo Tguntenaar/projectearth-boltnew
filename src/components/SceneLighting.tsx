@@ -1,10 +1,10 @@
-import { useRef } from 'react';
-import * as THREE from 'three';
-import { useFrame } from '@react-three/fiber';
+import { useRef } from "react";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 export function SceneLighting() {
   const mainLightRef = useRef<THREE.DirectionalLight>(null);
-  
+
   useFrame(() => {
     if (mainLightRef.current) {
       // Ensure light always points at the Earth
@@ -15,8 +15,8 @@ export function SceneLighting() {
   return (
     <>
       {/* Soft ambient light for base illumination */}
-      <ambientLight intensity={0.2} />
-      
+      <ambientLight intensity={1} />
+
       {/* Main directional light positioned far away */}
       <directionalLight
         ref={mainLightRef}
@@ -24,14 +24,14 @@ export function SceneLighting() {
         intensity={2}
         castShadow
       />
-      
+
       {/* Secondary rim light for depth */}
       <directionalLight
         position={[-30, -10, -30]}
         intensity={0.5}
         color="#4444ff"
       />
-      
+
       {/* Subtle fill light from behind */}
       <directionalLight
         position={[0, 0, -40]}

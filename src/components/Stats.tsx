@@ -1,16 +1,76 @@
-import React from 'react';
-import { TravelStats } from '../types/travel';
-import { Plane, Globe2, Map } from 'lucide-react';
+import React from "react";
+import { TravelStats } from "../types/travel";
+import {
+  Plane,
+  Globe2,
+  Map,
+  CalendarDays,
+  MapPinned,
+  MapPin,
+  Loader2,
+} from "lucide-react";
+import { travelData } from "../data/travelData";
+import { calculateDistance } from "../utils/coordinates";
 
 interface StatsProps {
   stats: TravelStats;
+  currentSegment: number;
 }
 
-export function Stats({ stats }: StatsProps) {
+export function Stats({ stats, currentSegment }: StatsProps) {
+  const traveledSoFar = travelData
+    .slice(0, currentSegment + 1)
+    .reduce((acc, location) => {
+      return (
+        acc +
+        calculateDistance(
+          location.coordinates[0],
+          location.coordinates[1],
+          travelData[currentSegment + 1].coordinates[0],
+          travelData[currentSegment + 1].coordinates[1]
+        )
+      );
+    }, 0);
+
   return (
     <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md rounded-lg p-4 text-white">
       <h2 className="text-xl font-bold mb-4">Travel Statistics</h2>
       <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center gap-2">
+          <MapPinned className="w-5 h-5" />
+          <div>
+            <p className="text-sm">From</p>
+            <p className="text-lg font-bold">
+              {travelData[currentSegment].city}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <MapPin className="w-5 h-5" />
+          <div>
+            <p className="text-sm">To</p>
+            <p className="text-lg font-bold">
+              {travelData[currentSegment + 1].city}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Loader2 className="w-5 h-5 animate-spin-slow" />
+          <div>
+            <p className="text-sm">Traveled</p>
+            <p className="text-lg font-bold">{Math.round(traveledSoFar)} km</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <CalendarDays className="w-5 h-5" />
+          <div>
+            <p className="text-sm">Date</p>
+            <p className="text-lg font-bold">
+              {travelData[currentSegment + 1].date}
+            </p>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           <Plane className="w-5 h-5" />
           <div>
@@ -36,7 +96,9 @@ export function Stats({ stats }: StatsProps) {
           <span className="w-5 h-5 flex items-center justify-center">✈️</span>
           <div>
             <p className="text-sm">Distance</p>
-            <p className="text-lg font-bold">{Math.round(stats.totalDistance).toLocaleString()} km</p>
+            <p className="text-lg font-bold">
+              {Math.round(stats.totalDistance).toLocaleString()} km
+            </p>
           </div>
         </div>
       </div>

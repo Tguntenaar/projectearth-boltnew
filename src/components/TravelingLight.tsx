@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import * as THREE from "three";
 import { TravelLocation } from "../types/travel";
 import { useAnimatedPath } from "../hooks/useAnimatedPath";
@@ -16,7 +15,7 @@ export function TravelingLight({
   progress,
   rotation,
 }: TravelingLightProps) {
-  const lightRef = useRef<THREE.PointLight>(null);
+  // const lightRef = useRef<THREE.PointLight>(null);
   const position = useAnimatedPath(from, to, progress, rotation);
 
   const rotatedPosition = ((point) => {

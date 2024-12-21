@@ -8,18 +8,13 @@ import { Stats } from "./components/Stats";
 import { SceneLighting } from "./components/SceneLighting";
 import { useEarthRotation } from "./hooks/useEarthRotation";
 import { travelData, travelStats } from "./data/travelData";
-import { debugCoordinates } from "./utils/debugCoordinates";
 import * as THREE from "three";
-
-// Calculate total path length for scaling
-// const totalDistance = travelData.slice(0, -1).reduce((acc, location, index) => {
-//   return acc + calculateDistance(location, travelData[index + 1]);
-// }, 0);
-
-debugCoordinates(travelData);
+// TODO use controls to change travel and rotation speed.
+// import { useSpeed } from "./hooks/useSpeed";
+// import { Controls } from "./components/Controls";
 
 export default function App() {
-  const rotation = useEarthRotation(0.001);
+  const rotation = useEarthRotation(0.0005);
   const [currentSegment, setCurrentSegment] = React.useState(0);
   const [segmentProgress, setSegmentProgress] = React.useState(0);
   const arrowGroupRef = useRef<THREE.Group>(null);
@@ -49,10 +44,12 @@ export default function App() {
     }
   }, []);
 
+  // const { speed } = useSpeed();
+
   React.useEffect(() => {
     let animationFrame: number;
-    const speed = 0.011; // Base speed
 
+    const speed = 0.005;
     const animate = () => {
       setSegmentProgress((prev) => {
         const newProgress = prev + speed;
@@ -85,7 +82,8 @@ export default function App() {
           <SceneLighting />
           <Stars radius={300} depth={60} count={20000} factor={7} fade />
           <Earth rotation={rotation} />
-          <group ref={arrowGroupRef} />`
+          <group ref={arrowGroupRef} />
+          {/* Add here */}
           <Text position={[1.1, 0, 0]} fontSize={0.1} color="blue">
             X
           </Text>
@@ -122,7 +120,10 @@ export default function App() {
         </Suspense>
       </Canvas>
 
-      <Stats stats={travelStats} />
+      <Stats stats={travelStats} currentSegment={currentSegment} />
+      {/* <Controls /> */}
+
+      {/* <Slider /> */}
     </div>
   );
 }
