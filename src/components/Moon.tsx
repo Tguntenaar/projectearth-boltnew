@@ -4,9 +4,10 @@ import * as THREE from "three";
 
 interface MoonProps {
   rotation: number;
+  position: THREE.Vector3;
 }
 
-export function Moon({ rotation }: MoonProps) {
+export function Moon({ rotation, position }: MoonProps) {
   const moonRef = useRef<THREE.Mesh>(null);
 
   // const moonGroup = new THREE.Group();
@@ -32,7 +33,7 @@ export function Moon({ rotation }: MoonProps) {
   }
 
   return (
-    <mesh ref={moonRef}>
+    <mesh ref={moonRef} position={position}>
       <sphereGeometry args={[0.27, 64, 64]} />
       <meshPhongMaterial
         map={colorMap}

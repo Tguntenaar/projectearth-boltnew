@@ -1,6 +1,7 @@
-import { latLongToVector3 } from './coordinates';
+import { calculateDistanceInKm, latLongToVector3 } from './coordinates';
 import * as THREE from 'three';
 
+import { travelData } from '../data/travelData';
 
 // TODO fix
 describe('latLongToVector3', () => {
@@ -15,3 +16,14 @@ describe('latLongToVector3', () => {
     expect(vector3).toEqual(new THREE.Vector3(0, 0, -1)); // y instead of z
   });
 }); 
+
+
+
+describe('calculateDistanceInKm', () => {
+  it('should calculate the distance between two points on the Earth', () => {
+    const amsterdam = travelData[0];
+    const capetown = travelData[1];
+    const distance = calculateDistanceInKm(amsterdam.coordinates[0], amsterdam.coordinates[1], capetown.coordinates[0], capetown.coordinates[1]);
+    expect(distance).toEqual(9685);
+  });
+});

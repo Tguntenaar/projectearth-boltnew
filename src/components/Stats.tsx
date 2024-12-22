@@ -10,7 +10,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { travelData } from "../data/travelData";
-import { calculateDistance } from "../utils/coordinates";
+import { calculateDistanceInKm } from "../utils/coordinates";
 
 interface StatsProps {
   stats: TravelStats;
@@ -20,14 +20,14 @@ interface StatsProps {
 export function Stats({ stats, currentSegment }: StatsProps) {
   const traveledSoFar = travelData
     .slice(0, currentSegment + 1)
-    .reduce((acc, location) => {
+    .reduce((acc, location, i) => {
       return (
         acc +
-        calculateDistance(
-          location.coordinates[0],
-          location.coordinates[1],
-          travelData[currentSegment + 1].coordinates[0],
-          travelData[currentSegment + 1].coordinates[1]
+        calculateDistanceInKm(
+          travelData[i].coordinates[0],
+          travelData[i].coordinates[1],
+          travelData[i + 1].coordinates[0],
+          travelData[i + 1].coordinates[1]
         )
       );
     }, 0);

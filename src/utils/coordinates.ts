@@ -36,6 +36,12 @@ export function calculateDistance(lat1: number, long1: number, lat2: number, lon
   return R * c;
 }
 
+export function calculateDistanceInKm(lat1: number, long1: number, lat2: number, long2: number): number {
+  const distance = calculateDistance(lat1, long1, lat2, long2);
+  // Round with out decimal
+  return Math.round(distance / 1000);
+}
+
 export function scaleValue(value: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number {
   return toMin + (toMax - toMin) * ((value - fromMin) / (fromMax - fromMin));
 }
