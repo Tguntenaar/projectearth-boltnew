@@ -14,5 +14,5 @@ export function useEarthRotation(speed: number = 0.001) {
     return () => cancelAnimationFrame(animationFrame);
   }, [speed]);
 
-  return rotation;
+  return { rotation, setRotation };
 }

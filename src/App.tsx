@@ -12,14 +12,13 @@ import { Moon } from "./components/Moon";
 import * as THREE from "three";
 import StarshipModel from "./components/Starship";
 // TODO: Use controls to change travel and rotation speed, etc.
-// import { useSpeed } from "./hooks/useSpeed";
 // import { Controls } from "./components/Controls";
+// import { useSpeed } from "./hooks/useSpeed";
 
 export default function App() {
   const moonOrbitRef = React.useRef<THREE.Group>(null);
   const starshipRef = React.useRef<THREE.Group>(null);
-  const starshipMoonRef = React.useRef<THREE.Group>(null);
-  const rotation = useEarthRotation(0.0005);
+  const { rotation } = useEarthRotation(0.0005);
   const [currentSegment, setCurrentSegment] = React.useState(0);
   const [segmentProgress, setSegmentProgress] = React.useState(0);
   const arrowGroupRef = useRef<THREE.Group>(null);
@@ -68,9 +67,6 @@ export default function App() {
         // starshipRef.current.position.x -= starshipSpeed;
         // starshipRef.current.position.z -= starshipSpeed;
       }
-      if (starshipMoonRef.current) {
-        starshipMoonRef.current.rotation.y -= starshipSpeed;
-      }
 
       // Advance the segment progress
       setSegmentProgress((prev) => {
@@ -106,9 +102,6 @@ export default function App() {
           </group>
           <group ref={moonOrbitRef}>
             <Moon rotation={rotation} position={new THREE.Vector3(10, 0, 0)} />
-            {/* <group ref={starshipMoonRef}>
-              <StarshipModel position={new THREE.Vector3(12, 0, 0)} />
-            </group> */}
           </group>
           <group ref={arrowGroupRef} />
           <Text position={[1.1, 0, 0]} fontSize={0.1} color="blue">
@@ -149,7 +142,6 @@ export default function App() {
 
       <Stats stats={travelStats} currentSegment={currentSegment} />
       {/* <Controls /> */}
-      {/* <Slider /> */}
     </div>
   );
 }
