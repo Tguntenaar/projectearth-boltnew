@@ -8,6 +8,7 @@ import { Stats } from "./components/Stats";
 import { SceneLighting } from "./components/SceneLighting";
 import { useEarthRotation } from "./hooks/useEarthRotation";
 import { travelData, travelStats } from "./data/travelData";
+import { Moon } from "./components/Moon";
 import * as THREE from "three";
 // TODO use controls to change travel and rotation speed.
 // import { useSpeed } from "./hooks/useSpeed";
@@ -82,8 +83,8 @@ export default function App() {
           <SceneLighting />
           <Stars radius={300} depth={60} count={20000} factor={7} fade />
           <Earth rotation={rotation} />
+          <Moon rotation={rotation} />
           <group ref={arrowGroupRef} />
-          {/* Add here */}
           <Text position={[1.1, 0, 0]} fontSize={0.1} color="blue">
             X
           </Text>
