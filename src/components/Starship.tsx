@@ -6,8 +6,7 @@ interface StarshipModelProps {
 }
 
 const StarshipModel = ({ position }: StarshipModelProps) => {
-  // Use the useGLTF hook to load the model
-  const { scene } = useGLTF("./src/models/starship.glb");
+  const { scene } = useGLTF("../models/starship.glb");
 
   const scale = 0.005;
   scene.scale.set(scale, scale, scale);

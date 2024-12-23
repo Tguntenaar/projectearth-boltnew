@@ -24,8 +24,8 @@ export function Moon({ rotation, position }: MoonProps) {
 
   const [colorMap, normalMap, specularMap] = useTexture([
     // Replace these texture URLs with your preferred moon textures
-    "./src/textures/06_moonmap4k.jpg",
-    "./src/textures/07_moonbump4k.jpg",
+    "./textures/06_moonmap4k.jpg",
+    "./textures/07_moonbump4k.jpg",
   ]);
 
   if (moonRef.current) {

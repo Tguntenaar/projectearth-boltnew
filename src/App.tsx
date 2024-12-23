@@ -1,6 +1,10 @@
 import React, { Suspense, useRef, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Stars, Text } from "@react-three/drei";
+import {
+  OrbitControls,
+  Stars,
+  // Text
+} from "@react-three/drei";
 import { Earth } from "./components/Earth";
 import { FlightPath } from "./components/FlightPath";
 import { TravelingLight } from "./components/TravelingLight";
@@ -104,7 +108,7 @@ export default function App() {
             <Moon rotation={rotation} position={new THREE.Vector3(10, 0, 0)} />
           </group>
           <group ref={arrowGroupRef} />
-          <Text position={[1.1, 0, 0]} fontSize={0.1} color="blue">
+          {/* <Text position={[1.1, 0, 0]} fontSize={0.1} color="blue">
             X
           </Text>
           <Text position={[0, 1.1, 0]} fontSize={0.1} color="red">
@@ -112,7 +116,7 @@ export default function App() {
           </Text>
           <Text position={[0, 0, 1.1]} fontSize={0.1} color="green">
             Z
-          </Text>
+          </Text> */}
           {travelData.slice(0, -1).map((_, index) => (
             <React.Fragment key={index}>
               <FlightPath

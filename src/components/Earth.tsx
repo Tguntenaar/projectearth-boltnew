@@ -1,6 +1,6 @@
-import { useRef } from 'react';
-import { useTexture } from '@react-three/drei';
-import * as THREE from 'three';
+import { useRef } from "react";
+import { useTexture } from "@react-three/drei";
+import * as THREE from "three";
 
 interface EarthProps {
   rotation: number;
@@ -9,9 +9,9 @@ interface EarthProps {
 export function Earth({ rotation }: EarthProps) {
   const earthRef = useRef<THREE.Mesh>(null);
   const [colorMap, normalMap, specularMap] = useTexture([
-    'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg',
-    'https://unpkg.com/three-globe/example/img/earth-topology.png',
-    'https://unpkg.com/three-globe/example/img/earth-water.png',
+    "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
+    "https://unpkg.com/three-globe/example/img/earth-topology.png",
+    "https://unpkg.com/three-globe/example/img/earth-water.png",
   ]);
 
   if (earthRef.current) {
