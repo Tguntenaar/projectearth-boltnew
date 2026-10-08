@@ -9,7 +9,7 @@ import {
 } from '../../utils/starshipOrbit';
 import starshipUrl from '../../models/starship-modern.glb?url';
 
-export type CameraView = 'earth' | 'moon' | 'starship' | 'aircraft';
+export type CameraView = 'earth' | 'moon' | 'starship' | 'aircraft' | 'overhead';
 
 useGLTF.preload(starshipUrl);
 
@@ -136,8 +136,8 @@ export function CameraRig({
       basis.makeBasis(vectors.side, tangent, direction);
       ship.current.quaternion.setFromRotationMatrix(basis);
     }
-    // AircraftChase drives the camera in the aircraft view.
-    if (view === 'earth' || view === 'aircraft') return;
+    // AircraftChase drives the camera in the aircraft and overhead views.
+    if (view === 'earth' || view === 'aircraft' || view === 'overhead') return;
     if (view === 'moon') {
       camera.position.copy(radial).multiplyScalar(6);
       camera.up.copy(up);
