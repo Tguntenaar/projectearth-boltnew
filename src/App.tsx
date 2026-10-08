@@ -10,6 +10,7 @@ import {
   Plane,
   Camera,
   LocateFixed,
+  Satellite,
 } from 'lucide-react';
 import { CameraView } from './components/globe/CameraRig';
 import { GlobeScene } from './components/globe/GlobeScene';
@@ -38,6 +39,7 @@ export default function App() {
   const [yearFilter, setYearFilter] = useState<number | null>(null);
   const [cameraView, setCameraView] = useState<CameraView>('earth');
   const [camerasOpen, setCamerasOpen] = useState(false);
+  const following = cameraView === 'aircraft' || cameraView === 'overhead';
   const cameraButton = useRef<HTMLButtonElement>(null);
   const cameraPanel = useRef<HTMLDivElement>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -189,6 +191,16 @@ export default function App() {
                   'Track Starship',
                   'Follow Starship with Earth in the background.',
                 ],
+                [
+                  'aircraft',
+                  'Behind the plane',
+                  'Chase the current flight from just behind it.',
+                ],
+                [
+                  'overhead',
+                  'Above the plane',
+                  'Look straight down on the plane, north up.',
+                ],
               ] as const
             ).map(([value, label, description]) => (
               <button
@@ -292,8 +304,10 @@ export default function App() {
                 : cameraView === 'moon'
                   ? 'View from the Moon'
                   : cameraView === 'aircraft'
-                    ? 'Following the plane'
-                    : 'Tracking Starship'}
+                    ? 'Behind the plane'
+                    : cameraView === 'overhead'
+                      ? 'Above the plane'
+                      : 'Tracking Starship'}
             </span>
           </div>
           <div className="atlas-panel pointer-events-auto flex items-center gap-3 p-3">
@@ -306,18 +320,39 @@ export default function App() {
             </button>
             <button
               className={`atlas-icon h-11 w-11 shrink-0 ${
-                cameraView === 'aircraft'
-                  ? 'bg-sky-200/15 text-sky-100'
-                  : 'bg-white/5'
+                following ? 'bg-sky-200/15 text-sky-100' : 'bg-white/5'
               }`}
-              aria-label="Follow the plane"
-              aria-pressed={cameraView === 'aircraft'}
-              title="Follow the plane"
+              aria-label={
+                cameraView === 'aircraft'
+                  ? 'Following behind the plane. Switch to above the plane'
+                  : cameraView === 'overhead'
+                    ? 'Following above the plane. Stop following'
+                    : 'Follow the plane'
+              }
+              aria-pressed={following}
+              title={
+                cameraView === 'aircraft'
+                  ? 'Behind the plane · tap for above'
+                  : cameraView === 'overhead'
+                    ? 'Above the plane · tap to stop'
+                    : 'Follow the plane'
+              }
+              // Cycles: off -> behind the plane -> above the plane -> off.
               onClick={() =>
-                setCameraView((v) => (v === 'aircraft' ? 'earth' : 'aircraft'))
+                setCameraView((v) =>
+                  v === 'aircraft'
+                    ? 'overhead'
+                    : v === 'overhead'
+                      ? 'earth'
+                      : 'aircraft',
+                )
               }
             >
-              <LocateFixed size={17} />
+              {cameraView === 'overhead' ? (
+                <Satellite size={17} />
+              ) : (
+                <LocateFixed size={17} />
+              )}
             </button>
             <button
               ref={detailsButton}

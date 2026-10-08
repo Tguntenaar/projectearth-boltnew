@@ -80,7 +80,8 @@ function GlobeContents({
       !reducedMotion &&
       !interacting.current &&
       cameraView !== 'earth' &&
-      cameraView !== 'aircraft'
+      cameraView !== 'aircraft' &&
+      cameraView !== 'overhead'
     )
       globe.current.rotation.y += Math.min(delta, 0.05) * 0.021;
   });
@@ -91,8 +92,14 @@ function GlobeContents({
         reducedMotion={reducedMotion}
         isPlaying={isPlaying}
       />
-      {cameraView === 'aircraft' && (
-        <AircraftChase curve={followCurve} motion={motion} globe={globe} />
+      {(cameraView === 'aircraft' || cameraView === 'overhead') && (
+        <AircraftChase
+          key={cameraView}
+          curve={followCurve}
+          motion={motion}
+          globe={globe}
+          mode={cameraView === 'aircraft' ? 'chase' : 'overhead'}
+        />
       )}
       <CameraFollow
         curve={followCurve}
