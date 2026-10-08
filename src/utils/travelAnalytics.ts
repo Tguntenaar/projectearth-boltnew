@@ -21,6 +21,15 @@ export interface ExtendedTravelStats {
   longestLeg: FlightLeg | null;
 }
 
+function legDistanceKm(from: TravelLocation, to: TravelLocation): number {
+  return calculateDistanceInKm(
+    from.coordinates[0],
+    from.coordinates[1],
+    to.coordinates[0],
+    to.coordinates[1]
+  );
+}
+
 export function buildFlightLegs(data: TravelLocation[]): FlightLeg[] {
   const legs: FlightLeg[] = [];
   for (let i = 0; i < data.length - 1; i++) {
@@ -28,18 +37,15 @@ export function buildFlightLegs(data: TravelLocation[]): FlightLeg[] {
     const to = data[i + 1];
     const isGround = !isFlightSegment(from, to);
     if (isGround) continue;
+    const distanceKm = legDistanceKm(from, to);
+    if (distanceKm <= 0) continue;
     legs.push({
       index: i,
       from,
       to,
       date: to.date,
       year: Number(to.date.slice(0, 4)),
-      distanceKm: calculateDistanceInKm(
-        from.coordinates[0],
-        from.coordinates[1],
-        to.coordinates[0],
-        to.coordinates[1]
-      ),
+      distanceKm,
       isGround: false,
     });
   }
