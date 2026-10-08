@@ -1,89 +1,100 @@
 import * as THREE from 'three';
 import { TravelLocation } from '../types/travel';
-import { calculateDistance, latLongToVector3, scaleValue } from './coordinates';
 
-const EARTH_RADIUS = 1;
-
-/** Match the globe mesh spin applied in the scene. */
-export function applyEarthSpin(point: THREE.Vector3, rotation: number): THREE.Vector3 {
-  const rotated = point.clone();
-  rotated.applyAxisAngle(new THREE.Vector3(0, -1, 0), rotation);
-  rotated.x = -rotated.x;
-  return rotated;
+export const SURFACE_RADIUS = 1.006;
+/** Three's sphere UVs put Greenwich on +X and east towards -Z. */
+export function surfacePoint(
+  lat: number,
+  lng: number,
+  radius = 1,
+): THREE.Vector3 {
+  const phi = THREE.MathUtils.degToRad(lat);
+  const theta = THREE.MathUtils.degToRad(lng);
+  return new THREE.Vector3(
+    Math.cos(phi) * Math.cos(theta),
+    Math.sin(phi),
+    -Math.cos(phi) * Math.sin(theta),
+  ).multiplyScalar(radius);
 }
-
-export function surfacePoint(lat: number, lng: number, radius = EARTH_RADIUS): THREE.Vector3 {
-  return latLongToVector3(lat, lng).multiplyScalar(radius);
+export function flightAltitudeForDistance(meters: number): number {
+  return THREE.MathUtils.clamp((meters / 6371000) * 0.13, 0.012, 0.32);
 }
-
-/** Peak altitude above the unit sphere (e.g. 0.08 ≈ 8% radius). */
-export function flightAltitudeForDistance(distanceMeters: number): number {
-  return scaleValue(distanceMeters, 200_000, 12_000_000, 0.035, 0.14);
+export function easeFlight(t: number): number {
+  t = THREE.MathUtils.clamp(t, 0, 1);
+  return t * t * (3 - 2 * t);
 }
-
+/** An analytic great circle with a deterministic plane even for antipodal stops.
+ * All runtime samplers write into caller-owned vectors. */
+export class FlightCurve extends THREE.Curve<THREE.Vector3> {
+  readonly start: THREE.Vector3;
+  readonly along: THREE.Vector3;
+  readonly angle: number;
+  readonly altitude: number;
+  constructor(
+    from: TravelLocation,
+    to: TravelLocation,
+    ground = to.travelMode === 'ground',
+  ) {
+    super();
+    this.start = surfacePoint(...from.coordinates);
+    const end = surfacePoint(...to.coordinates);
+    const dot = THREE.MathUtils.clamp(this.start.dot(end), -1, 1);
+    this.along = end.clone().addScaledVector(this.start, -dot);
+    this.angle = Math.atan2(this.along.length(), dot);
+    if (this.along.lengthSq() < 1e-20) {
+      const axis =
+        Math.abs(this.start.y) < 0.9
+          ? new THREE.Vector3(0, 1, 0)
+          : new THREE.Vector3(1, 0, 0);
+      this.along.crossVectors(axis, this.start);
+    }
+    this.along.normalize();
+    this.altitude =
+      ground || this.angle < 1e-8
+        ? 0
+        : flightAltitudeForDistance(this.angle * 6371000);
+  }
+  getPoint(t: number, target = new THREE.Vector3()): THREE.Vector3 {
+    const a = this.angle * t;
+    return target
+      .copy(this.start)
+      .multiplyScalar(Math.cos(a))
+      .addScaledVector(this.along, Math.sin(a))
+      .multiplyScalar(SURFACE_RADIUS + this.altitude * Math.sin(Math.PI * t));
+  }
+  getTangent(t: number, target = new THREE.Vector3()): THREE.Vector3 {
+    const a = this.angle * t;
+    const r = SURFACE_RADIUS + this.altitude * Math.sin(Math.PI * t);
+    const dr = this.altitude * Math.PI * Math.cos(Math.PI * t);
+    if (this.angle < 1e-8) return target.copy(this.along);
+    return target
+      .copy(this.start)
+      .multiplyScalar(dr * Math.cos(a) - r * this.angle * Math.sin(a))
+      .addScaledVector(
+        this.along,
+        dr * Math.sin(a) + r * this.angle * Math.cos(a),
+      )
+      .normalize();
+  }
+}
 export function sampleGreatCircleArc(
   from: TravelLocation,
   to: TravelLocation,
-  segments = 72
-): THREE.Vector3[] {
-  const start = latLongToVector3(from.coordinates[0], from.coordinates[1]).normalize();
-  const end = latLongToVector3(to.coordinates[0], to.coordinates[1]).normalize();
-  const distance = calculateDistance(
-    from.coordinates[0],
-    from.coordinates[1],
-    to.coordinates[0],
-    to.coordinates[1]
-  );
-  const peakAlt = flightAltitudeForDistance(distance);
-
-  const omega = Math.acos(Math.min(1, Math.max(-1, start.dot(end))));
-  const sinOmega = Math.sin(omega);
-
-  const points: THREE.Vector3[] = [];
-  for (let i = 0; i <= segments; i++) {
-    const t = i / segments;
-    let point: THREE.Vector3;
-    if (sinOmega < 1e-5) {
-      point = start.clone().lerp(end, t);
-    } else {
-      const a = Math.sin((1 - t) * omega) / sinOmega;
-      const b = Math.sin(t * omega) / sinOmega;
-      point = start.clone().multiplyScalar(a).add(end.clone().multiplyScalar(b));
-    }
-    const lift = peakAlt * Math.sin(Math.PI * t);
-    point.normalize().multiplyScalar(EARTH_RADIUS + lift);
-    points.push(point);
-  }
-  return points;
+  segments = 128,
+) {
+  return new FlightCurve(from, to).getPoints(segments);
 }
-
 export function getPointOnArc(
   from: TravelLocation,
   to: TravelLocation,
-  t: number
-): THREE.Vector3 {
-  const samples = sampleGreatCircleArc(from, to, 72);
-  const clamped = Math.min(1, Math.max(0, t));
-  const index = clamped * (samples.length - 1);
-  const i0 = Math.floor(index);
-  const i1 = Math.min(samples.length - 1, i0 + 1);
-  const frac = index - i0;
-  return samples[i0].clone().lerp(samples[i1], frac);
+  t: number,
+) {
+  return new FlightCurve(from, to).getPoint(t);
 }
-
 export function getTangentOnArc(
   from: TravelLocation,
   to: TravelLocation,
-  t: number
-): THREE.Vector3 {
-  const epsilon = 0.002;
-  const t0 = Math.max(0, t - epsilon);
-  const t1 = Math.min(1, t + epsilon);
-  const p0 = getPointOnArc(from, to, t0);
-  const p1 = getPointOnArc(from, to, t1);
-  return p1.sub(p0).normalize();
-}
-
-export function spinArcPoints(points: THREE.Vector3[], rotation: number): THREE.Vector3[] {
-  return points.map((p) => applyEarthSpin(p, rotation));
+  t: number,
+) {
+  return new FlightCurve(from, to).getTangent(t);
 }

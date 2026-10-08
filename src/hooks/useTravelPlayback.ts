@@ -1,77 +1,72 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { travelData, isFlightSegment } from '../data/travelData';
-
-function nextFlightSegment(from: number): number {
-  let next = from;
-  let guard = 0;
-  while (guard < travelData.length) {
-    if (isFlightSegment(travelData[next], travelData[next + 1])) {
-      return next;
-    }
-    next = (next + 1) % (travelData.length - 1);
-    guard += 1;
-  }
-  return 0;
+import { travelData } from '../data/travelData';
+import { useReducedMotion } from './useReducedMotion';
+export interface PlaybackMotion {
+  progress: number;
+  segment: number;
 }
-
 export function useTravelPlayback(initialSpeed = 0.004) {
+  const reducedMotion = useReducedMotion();
   const [segmentIndex, setSegmentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(!reducedMotion);
   const [speed, setSpeed] = useState(initialSpeed);
-  const rafRef = useRef<number>();
-
-  const activeSegment = nextFlightSegment(segmentIndex);
-
+  const motion = useRef<PlaybackMotion>({ progress: 0, segment: 0 });
   const goToSegment = useCallback((index: number, resetProgress = true) => {
-    const clamped = Math.max(0, Math.min(travelData.length - 2, index));
-    setSegmentIndex(nextFlightSegment(clamped));
-    if (resetProgress) setProgress(0);
+    const segment = Math.max(0, Math.min(travelData.length - 2, index));
+    motion.current.segment = segment;
+    if (resetProgress) motion.current.progress = 0;
+    setSegmentIndex(segment);
+    setProgress(motion.current.progress);
   }, []);
-
-  const stepSegment = useCallback((delta: number) => {
-    setSegmentIndex((current) => {
-      let next = current + delta;
-      if (next < 0) next = travelData.length - 2;
-      if (next > travelData.length - 2) next = 0;
-      return nextFlightSegment(next);
-    });
-    setProgress(0);
-  }, []);
-
+  const stepSegment = useCallback(
+    (delta: number) =>
+      goToSegment(
+        (motion.current.segment + delta + travelData.length - 1) %
+          (travelData.length - 1),
+      ),
+    [goToSegment],
+  );
+  useEffect(() => {
+    if (reducedMotion) setIsPlaying(false);
+  }, [reducedMotion]);
   useEffect(() => {
     if (!isPlaying) return;
-
-    const tick = () => {
-      setProgress((prev) => {
-        const next = prev + speed;
-        if (next >= 1) {
-          setSegmentIndex((current) => {
-            let nextSeg = (current + 1) % (travelData.length - 1);
-            return nextFlightSegment(nextSeg);
-          });
-          return 0;
-        }
-        return next;
-      });
-      rafRef.current = requestAnimationFrame(tick);
+    let raf: number;
+    let previous = performance.now();
+    let lastPublish = previous;
+    const tick = (now: number) => {
+      const dt = Math.min((now - previous) / 1000, 0.05);
+      previous = now;
+      motion.current.progress += dt * speed * 60;
+      if (motion.current.progress >= 1) {
+        motion.current.progress = 0;
+        motion.current.segment =
+          (motion.current.segment + 1) % (travelData.length - 1);
+        setSegmentIndex(motion.current.segment);
+      }
+      // Canvas reads the ref at display refresh rate; sidebar only updates at 10 Hz.
+      if (now - lastPublish >= 100 || motion.current.progress === 0) {
+        setProgress(motion.current.progress);
+        lastPublish = now;
+      }
+      raf = requestAnimationFrame(tick);
     };
-
-    rafRef.current = requestAnimationFrame(tick);
+    raf = requestAnimationFrame(tick);
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      cancelAnimationFrame(raf);
+      setProgress(motion.current.progress);
     };
   }, [isPlaying, speed]);
-
   return {
     segmentIndex,
-    activeSegment,
+    activeSegment: segmentIndex,
     progress,
     isPlaying,
     speed,
+    motion,
     setIsPlaying,
     setSpeed,
-    setProgress,
     goToSegment,
     stepSegment,
   };

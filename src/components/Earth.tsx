@@ -1,31 +1,29 @@
-import { useRef } from "react";
-import { useTexture } from "@react-three/drei";
-import * as THREE from "three";
+import { useEffect } from 'react';
+import { SRGBColorSpace } from 'three';
+import { useTexture } from '@react-three/drei';
 
-interface EarthProps {
-  rotation: number;
-}
-
-export function Earth({ rotation }: EarthProps) {
-  const earthRef = useRef<THREE.Mesh>(null);
-  const [colorMap, normalMap, specularMap] = useTexture([
-    "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
-    "https://unpkg.com/three-globe/example/img/earth-topology.png",
-    "https://unpkg.com/three-globe/example/img/earth-water.png",
+export function Earth() {
+  const [colorMap, bumpMap, specularMap] = useTexture([
+    'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg',
+    'https://unpkg.com/three-globe/example/img/earth-topology.png',
+    'https://unpkg.com/three-globe/example/img/earth-water.png',
   ]);
 
-  if (earthRef.current) {
-    earthRef.current.rotation.y = rotation;
-  }
+  useEffect(() => {
+    colorMap.colorSpace = SRGBColorSpace;
+    colorMap.needsUpdate = true;
+  }, [colorMap]);
 
   return (
-    <mesh ref={earthRef}>
+    <mesh>
       <sphereGeometry args={[1, 64, 64]} />
       <meshPhongMaterial
         map={colorMap}
-        normalMap={normalMap}
+        bumpMap={bumpMap}
+        bumpScale={0.008}
         specularMap={specularMap}
-        shininess={5}
+        shininess={12}
+        specular="#35495e"
       />
     </mesh>
   );

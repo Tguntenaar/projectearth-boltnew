@@ -18,3 +18,35 @@ body {
 canvas {
   touch-action: none;
 }
+
+@layer components {
+  .atlas-panel {
+    @apply rounded-2xl border border-white/10 bg-[#0b1222]/90 shadow-2xl backdrop-blur-xl;
+  }
+  .atlas-button {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full border border-white/15 bg-[#0b1222]/80 px-4 text-xs text-slate-200 backdrop-blur-xl transition-colors hover:bg-slate-800;
+  }
+  .atlas-icon {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-300 transition-colors hover:bg-white/10 hover:text-white;
+  }
+  .atlas-choice {
+    @apply rounded-lg border border-white/10 px-3 py-2.5 text-xs text-slate-300 transition-colors hover:bg-white/10;
+  }
+  .atlas-choice[aria-pressed='true'] {
+    @apply border-sky-200/30 bg-sky-200/10 text-sky-100;
+  }
+}
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+  }
+}
