@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { travelData } from '../data/travelData';
 import { useReducedMotion } from './useReducedMotion';
+function nextMovingSegment(index: number): number {
+  for (let checked = 0; checked < travelData.length - 1; checked++) {
+    const from = travelData[index].coordinates;
+    const to = travelData[index + 1].coordinates;
+    if (from[0] !== to[0] || from[1] !== to[1]) return index;
+    index = (index + 1) % (travelData.length - 1);
+  }
+  return index;
+}
 export interface PlaybackMotion {
   progress: number;
   segment: number;
@@ -41,8 +50,9 @@ export function useTravelPlayback(initialSpeed = 0.004) {
       motion.current.progress += dt * speed * 60;
       if (motion.current.progress >= 1) {
         motion.current.progress = 0;
-        motion.current.segment =
-          (motion.current.segment + 1) % (travelData.length - 1);
+        motion.current.segment = nextMovingSegment(
+          (motion.current.segment + 1) % (travelData.length - 1),
+        );
         setSegmentIndex(motion.current.segment);
       }
       // Canvas reads the ref at display refresh rate; sidebar only updates at 10 Hz.

@@ -12,6 +12,8 @@ import { AirportPulses } from './AirportPulses';
 import { colorForDate } from '../../utils/yearColors';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { CameraRig, CameraView } from './CameraRig';
+import { CameraFollow } from './CameraFollow';
+import { FlightCurve } from '../../utils/globeMath';
 import { PlaybackMotion } from '../../hooks/useTravelPlayback';
 interface GlobeSceneProps {
   cameraView: CameraView;
@@ -63,11 +65,21 @@ function GlobeContents({
   );
   const activeFrom = travelData[activeSegment];
   const activeTo = travelData[activeSegment + 1];
+  const followCurve = useMemo(
+    () => new FlightCurve(activeFrom, activeTo),
+    [activeFrom, activeTo],
+  );
   const showAircraft = isFlightSegment(activeFrom, activeTo);
   const yearMatch =
     routeView !== 'year' || Number(activeTo.date.slice(0, 4)) === yearFilter;
   useFrame((_, delta) => {
-    if (globe.current && isPlaying && !reducedMotion && !interacting.current)
+    if (
+      globe.current &&
+      isPlaying &&
+      !reducedMotion &&
+      !interacting.current &&
+      cameraView !== 'earth'
+    )
       globe.current.rotation.y += Math.min(delta, 0.05) * 0.021;
   });
   return (
@@ -76,6 +88,18 @@ function GlobeContents({
         view={cameraView}
         reducedMotion={reducedMotion}
         isPlaying={isPlaying}
+      />
+      <CameraFollow
+        curve={followCurve}
+        motion={motion}
+        globe={globe}
+        interacting={interacting}
+        enabled={
+          cameraView === 'earth' &&
+          routeView === 'current' &&
+          isPlaying &&
+          !reducedMotion
+        }
       />
       <SceneLighting />
       <Stars radius={280} depth={50} count={3000} factor={3} fade speed={0} />
