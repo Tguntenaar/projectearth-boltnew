@@ -2,6 +2,10 @@ import { Suspense, useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import {
+  sampleStarshipOrbit,
+  STARSHIP_ORBIT_SPEED,
+} from '../../utils/starshipOrbit';
 import starshipUrl from '../../models/starship.glb?url';
 
 export type CameraView = 'earth' | 'moon' | 'starship';
@@ -74,7 +78,9 @@ export function CameraRig({
       radial,
       right,
       up,
-      modelUp: new THREE.Vector3(0, 1, 0),
+      orbitNormal: new THREE.Vector3(0, 1, 0),
+      tangent: new THREE.Vector3(),
+      basis: new THREE.Matrix4(),
       direction: new THREE.Vector3(),
       position: new THREE.Vector3(),
       target: new THREE.Vector3(),
@@ -92,33 +98,42 @@ export function CameraRig({
     previousView.current = view;
   }, [view, camera, savedEarth]);
   useFrame((_, delta) => {
+    const {
+      radial,
+      up,
+      direction,
+      tangent,
+      position,
+      target,
+      orbitNormal,
+      basis,
+    } = vectors;
+    // Camera selection must never change the orbit or stop its clock.
+    if (!reducedMotion && isPlaying)
+      orbit.current =
+        (orbit.current + Math.min(delta, 0.05) * STARSHIP_ORBIT_SPEED) %
+        (Math.PI * 2);
+    sampleStarshipOrbit(orbit.current, position, direction, tangent);
+    if (ship.current) {
+      ship.current.position.copy(position);
+      // The asset's nose is +Y; +Z faces away from Earth throughout the orbit.
+      basis.makeBasis(orbitNormal, tangent, direction);
+      ship.current.quaternion.setFromRotationMatrix(basis);
+    }
     if (view === 'earth') return;
-    const { radial, right, up, direction, position, target } = vectors;
     if (view === 'moon') {
       camera.position.copy(radial).multiplyScalar(6);
       camera.up.copy(up);
       camera.lookAt(0, 0, 0);
       return;
     }
-    if (!reducedMotion && isPlaying)
-      orbit.current += Math.min(delta, 0.05) * 0.035;
-    direction
-      .copy(radial)
-      .multiplyScalar(Math.cos(orbit.current))
-      .addScaledVector(right, Math.sin(orbit.current));
-    position.copy(direction).multiplyScalar(2.1).addScaledVector(up, 0.15);
-    if (ship.current) {
-      ship.current.position.copy(position);
-      ship.current.quaternion.setFromUnitVectors(vectors.modelUp, up);
-      ship.current.rotateZ(-0.2);
-    }
     const distance = Math.max(3.3, (1.7 * size.height) / size.width);
     camera.position
       .copy(position)
       .addScaledVector(direction, distance)
-      .addScaledVector(right, 0.75)
-      .addScaledVector(up, 0.15);
-    camera.up.copy(up);
+      .addScaledVector(tangent, 0.75)
+      .addScaledVector(orbitNormal, 0.3);
+    camera.up.copy(orbitNormal);
     target.copy(position).multiplyScalar(0.3);
     camera.lookAt(target);
   });
@@ -135,13 +150,11 @@ export function CameraRig({
           <LunarSurface position={vectors.moon} />
         </Suspense>
       )}
-      {view === 'starship' && (
-        <group ref={ship} name="tracked-starship">
-          <Suspense fallback={null}>
-            <Starship />
-          </Suspense>
-        </group>
-      )}
+      <group ref={ship} name="tracked-starship">
+        <Suspense fallback={null}>
+          <Starship />
+        </Suspense>
+      </group>
     </>
   );
 }
