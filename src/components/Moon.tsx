@@ -1,14 +1,11 @@
-import { useRef } from "react";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 
 interface MoonProps {
-  rotation: number;
-  position: THREE.Vector3;
+  position: THREE.Vector3 | [number, number, number];
 }
 
-export function Moon({ rotation, position }: MoonProps) {
-  const moonRef = useRef<THREE.Mesh>(null);
+export function Moon({ position }: MoonProps) {
 
   // const moonGroup = new THREE.Group();
   // scene.add(moonGroup);
@@ -28,12 +25,8 @@ export function Moon({ rotation, position }: MoonProps) {
     "./textures/07_moonbump4k.jpg",
   ]);
 
-  if (moonRef.current) {
-    moonRef.current.rotation.y = rotation;
-  }
-
   return (
-    <mesh ref={moonRef} position={position}>
+    <mesh position={position}>
       <sphereGeometry args={[0.27, 64, 64]} />
       <meshPhongMaterial
         map={colorMap}

@@ -1,11 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { travelData, isFlightSegment } from '../data/travelData';
+import { calculateDistanceInKm } from '../utils/coordinates';
+
+function isPlayableSegment(index: number): boolean {
+  const from = travelData[index];
+  const to = travelData[index + 1];
+  if (!from || !to || !isFlightSegment(from, to)) return false;
+  return (
+    calculateDistanceInKm(
+      from.coordinates[0],
+      from.coordinates[1],
+      to.coordinates[0],
+      to.coordinates[1]
+    ) > 0
+  );
+}
 
 function nextFlightSegment(from: number): number {
   let next = from;
   let guard = 0;
   while (guard < travelData.length) {
-    if (isFlightSegment(travelData[next], travelData[next + 1])) {
+    if (isPlayableSegment(next)) {
       return next;
     }
     next = (next + 1) % (travelData.length - 1);
