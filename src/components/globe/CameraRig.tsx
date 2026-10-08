@@ -4,16 +4,21 @@ import { useGLTF, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import {
   sampleStarshipOrbit,
+  openingStarshipPhase,
   STARSHIP_ORBIT_SPEED,
 } from '../../utils/starshipOrbit';
-import starshipUrl from '../../models/starship.glb?url';
+import starshipUrl from '../../models/starship-modern.glb?url';
 
 export type CameraView = 'earth' | 'moon' | 'starship';
 
-function Starship() {
+useGLTF.preload(starshipUrl);
+
+function Starship({ ready }: { ready: React.MutableRefObject<boolean> }) {
   const { scene } = useGLTF(starshipUrl);
   const model = useMemo(() => {
     const clone = scene.clone(true);
+    // Fixed roll exposes the boundary between ceramic tiles and stainless steel.
+    clone.rotation.y = -Math.PI / 3;
     const box = new THREE.Box3().setFromObject(clone);
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
@@ -22,6 +27,12 @@ function Starship() {
     clone.position.copy(center).multiplyScalar(-scale);
     return clone;
   }, [scene]);
+  useEffect(() => {
+    ready.current = true;
+    return () => {
+      ready.current = false;
+    };
+  }, [ready]);
   return <primitive object={model} />;
 }
 
@@ -59,7 +70,8 @@ export function CameraRig({
 }) {
   const { camera, size } = useThree();
   const ship = useRef<THREE.Group>(null);
-  const orbit = useRef(0);
+  const orbit = useRef<number | null>(null);
+  const shipReady = useRef(false);
   const previousView = useRef<CameraView>('earth');
   const savedEarth = useMemo(
     () => ({
@@ -80,6 +92,7 @@ export function CameraRig({
       up,
       orbitNormal: new THREE.Vector3(0, 1, 0),
       tangent: new THREE.Vector3(),
+      side: new THREE.Vector3(),
       basis: new THREE.Matrix4(),
       direction: new THREE.Vector3(),
       position: new THREE.Vector3(),
@@ -108,8 +121,10 @@ export function CameraRig({
       orbitNormal,
       basis,
     } = vectors;
+    if (orbit.current === null) orbit.current = openingStarshipPhase(camera);
+    // Start the opening flyby when the model is actually visible, not while downloading.
     // Camera selection must never change the orbit or stop its clock.
-    if (!reducedMotion && isPlaying)
+    if (shipReady.current && !reducedMotion && isPlaying)
       orbit.current =
         (orbit.current + Math.min(delta, 0.05) * STARSHIP_ORBIT_SPEED) %
         (Math.PI * 2);
@@ -117,7 +132,8 @@ export function CameraRig({
     if (ship.current) {
       ship.current.position.copy(position);
       // The asset's nose is +Y; +Z faces away from Earth throughout the orbit.
-      basis.makeBasis(orbitNormal, tangent, direction);
+      vectors.side.crossVectors(tangent, direction).normalize();
+      basis.makeBasis(vectors.side, tangent, direction);
       ship.current.quaternion.setFromRotationMatrix(basis);
     }
     if (view === 'earth') return;
@@ -152,7 +168,7 @@ export function CameraRig({
       )}
       <group ref={ship} name="tracked-starship">
         <Suspense fallback={null}>
-          <Starship />
+          <Starship ready={shipReady} />
         </Suspense>
       </group>
     </>

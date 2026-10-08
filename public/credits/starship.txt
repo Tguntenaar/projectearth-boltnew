@@ -1,0 +1,12 @@
+Starship model by David Leeds (@leedsexplore)
+https://github.com/leedsexplore/starship-custom-name
+Licensed under Creative Commons Attribution 4.0 International:
+https://creativecommons.org/licenses/by/4.0/
+
+Source: assets/starship_print_1_200_mmu_hex.3mf
+Revision: aeadd6f8ec3ed632952433afe5dc5d7001272086
+Changes: mesh simplification, coordinate rotation, normalization and PBR materials.
+The original parametric mesh license declaration is included in starship-source.txt.
+
+This is an unofficial modern Block 2 / Block 3 fan model, not an exact,
+as-built Ship 41 / Flight 14 replica or a SpaceX engineering model.

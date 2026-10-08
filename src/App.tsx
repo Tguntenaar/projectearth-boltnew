@@ -209,6 +209,9 @@ export default function App() {
           </div>
           <p className="mt-4 text-xs leading-relaxed text-slate-400">
             Cinematic viewpoints. Pause playback to hold the scene still.
+            <a href="/credits/starship.txt" target="_blank" rel="noreferrer" className="mt-2 block underline underline-offset-4">
+              Starship model: David Leeds · CC BY 4.0
+            </a>
           </p>
         </div>
       )}
