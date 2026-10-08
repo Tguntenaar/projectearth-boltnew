@@ -20,10 +20,10 @@ describe('latLongToVector3', () => {
 describe('calculateDistanceInKm', () => {
   it('should calculate the distance between two points on the Earth', () => {
     const amsterdam = travelData.find(
-      (l) => l.city === 'Amsterdam' && l.date === '2022-09-30',
+      (l) => l.city === 'Amsterdam',
     )!;
     const capetown = travelData.find(
-      (l) => l.city === 'Cape Town' && l.date === '2022-10-01',
+      (l) => l.city === 'Cape Town',
     )!;
     const distance = calculateDistanceInKm(
       amsterdam.coordinates[0],
