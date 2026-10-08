@@ -13,6 +13,7 @@ import { colorForDate } from '../../utils/yearColors';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { CameraRig, CameraView } from './CameraRig';
 import { CameraFollow } from './CameraFollow';
+import { AircraftChase } from './AircraftChase';
 import { FlightCurve } from '../../utils/globeMath';
 import { PlaybackMotion } from '../../hooks/useTravelPlayback';
 interface GlobeSceneProps {
@@ -78,7 +79,8 @@ function GlobeContents({
       isPlaying &&
       !reducedMotion &&
       !interacting.current &&
-      cameraView !== 'earth'
+      cameraView !== 'earth' &&
+      cameraView !== 'aircraft'
     )
       globe.current.rotation.y += Math.min(delta, 0.05) * 0.021;
   });
@@ -89,6 +91,9 @@ function GlobeContents({
         reducedMotion={reducedMotion}
         isPlaying={isPlaying}
       />
+      {cameraView === 'aircraft' && (
+        <AircraftChase curve={followCurve} motion={motion} globe={globe} />
+      )}
       <CameraFollow
         curve={followCurve}
         motion={motion}
@@ -172,7 +177,9 @@ function GlobeContents({
   );
 }
 export function GlobeScene(props: GlobeSceneProps) {
-  const reducedMotion = useReducedMotion();
+  // Reduced motion only decides that playback starts paused (useTravelPlayback).
+  // Pressing Play is an explicit opt-in, so the whole scene animates while playing.
+  const reducedMotion = useReducedMotion() && !props.isPlaying;
   return (
     <Canvas
       camera={{ position: [2.6, 1.7, -0.9], fov: 42, near: 0.01 }}

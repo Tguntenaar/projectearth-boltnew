@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Plane,
   Camera,
+  LocateFixed,
 } from 'lucide-react';
 import { CameraView } from './components/globe/CameraRig';
 import { GlobeScene } from './components/globe/GlobeScene';
@@ -130,7 +131,7 @@ export default function App() {
           >
             <Camera size={15} />
             <span>Camera</span>
-            {cameraView !== 'earth' && (
+            {(cameraView === 'moon' || cameraView === 'starship') && (
               <span className="h-1.5 w-1.5 rounded-full bg-sky-300" />
             )}
           </button>
@@ -290,7 +291,9 @@ export default function App() {
                 ? 'Drag to explore · Pinch to zoom'
                 : cameraView === 'moon'
                   ? 'View from the Moon'
-                  : 'Tracking Starship'}
+                  : cameraView === 'aircraft'
+                    ? 'Following the plane'
+                    : 'Tracking Starship'}
             </span>
           </div>
           <div className="atlas-panel pointer-events-auto flex items-center gap-3 p-3">
@@ -300,6 +303,21 @@ export default function App() {
               onClick={() => setIsPlaying((p) => !p)}
             >
               {isPlaying ? <Pause size={17} /> : <Play size={17} />}
+            </button>
+            <button
+              className={`atlas-icon h-11 w-11 shrink-0 ${
+                cameraView === 'aircraft'
+                  ? 'bg-sky-200/15 text-sky-100'
+                  : 'bg-white/5'
+              }`}
+              aria-label="Follow the plane"
+              aria-pressed={cameraView === 'aircraft'}
+              title="Follow the plane"
+              onClick={() =>
+                setCameraView((v) => (v === 'aircraft' ? 'earth' : 'aircraft'))
+              }
+            >
+              <LocateFixed size={17} />
             </button>
             <button
               ref={detailsButton}
