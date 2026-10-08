@@ -177,8 +177,8 @@ function GlobeContents({
   );
 }
 export function GlobeScene(props: GlobeSceneProps) {
-  // Reduced motion only decides that playback starts paused (useTravelPlayback).
-  // Pressing Play is an explicit opt-in, so the whole scene animates while playing.
+  // Playback autoplays regardless of the OS setting, so reduced motion only
+  // applies while paused: the whole scene animates whenever it is playing.
   const reducedMotion = useReducedMotion() && !props.isPlaying;
   return (
     <Canvas
