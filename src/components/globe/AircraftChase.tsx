@@ -5,8 +5,8 @@ import { FlightCurve, easeFlight } from '../../utils/globeMath';
 import { PlaybackMotion } from '../../hooks/useTravelPlayback';
 
 // Chase distance behind the aircraft, height above it, and how far ahead to look.
-const BEHIND = 0.32;
-const ABOVE = 0.14;
+const BEHIND = 0.5;
+const ABOVE = 0.22;
 const AHEAD = 0.12;
 
 /** Chase camera behind the active aircraft. Samples the same arc-length point as
