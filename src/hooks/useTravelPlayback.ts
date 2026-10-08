@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { travelData } from '../data/travelData';
-import { useReducedMotion } from './useReducedMotion';
 function nextMovingSegment(index: number): number {
   for (let checked = 0; checked < travelData.length - 1; checked++) {
     const from = travelData[index].coordinates;
@@ -15,10 +14,11 @@ export interface PlaybackMotion {
   segment: number;
 }
 export function useTravelPlayback(initialSpeed = 0.004) {
-  const reducedMotion = useReducedMotion();
   const [segmentIndex, setSegmentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(!reducedMotion);
+  // Autoplays even with the OS "Reduce motion" setting on (Thomas's choice);
+  // pausing still holds the whole scene still.
+  const [isPlaying, setIsPlaying] = useState(true);
   const [speed, setSpeed] = useState(initialSpeed);
   const motion = useRef<PlaybackMotion>({ progress: 0, segment: 0 });
   const goToSegment = useCallback((index: number, resetProgress = true) => {
@@ -36,9 +36,6 @@ export function useTravelPlayback(initialSpeed = 0.004) {
       ),
     [goToSegment],
   );
-  useEffect(() => {
-    if (reducedMotion) setIsPlaying(false);
-  }, [reducedMotion]);
   useEffect(() => {
     if (!isPlaying) return;
     let raf: number;
