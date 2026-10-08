@@ -4,6 +4,8 @@ export interface TravelLocation {
   country: string;
   coordinates: [number, number];
   date: string;
+  /** When set to `ground`, the leg from the previous location is not drawn as a flight arc. */
+  travelMode?: 'flight' | 'ground';
 }
 
 export interface TravelStats {

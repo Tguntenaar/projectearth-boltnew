@@ -11,7 +11,7 @@ import { TravelingLight } from "./components/TravelingLight";
 import { Stats } from "./components/Stats";
 import { SceneLighting } from "./components/SceneLighting";
 import { useEarthRotation } from "./hooks/useEarthRotation";
-import { travelData, travelStats } from "./data/travelData";
+import { travelData, travelStats, isFlightSegment } from "./data/travelData";
 import { Moon } from "./components/Moon";
 import * as THREE from "three";
 import StarshipModel from "./components/Starship";
@@ -76,9 +76,18 @@ export default function App() {
       setSegmentProgress((prev) => {
         const newProgress = prev + travelSpeed;
         if (newProgress >= 1) {
-          setCurrentSegment(
-            (current) => (current + 1) % (travelData.length - 1)
-          );
+          setCurrentSegment((current) => {
+            let next = (current + 1) % (travelData.length - 1);
+            let guard = 0;
+            while (
+              guard < travelData.length &&
+              !isFlightSegment(travelData[next], travelData[next + 1])
+            ) {
+              next = (next + 1) % (travelData.length - 1);
+              guard += 1;
+            }
+            return next;
+          });
           return 0;
         }
         return newProgress;
@@ -91,8 +100,18 @@ export default function App() {
     return () => cancelAnimationFrame(animationFrame);
   }, []);
 
-  const currentFrom = travelData[currentSegment];
-  const currentTo = travelData[currentSegment + 1];
+  const findNextFlightSegment = (segment: number): number => {
+    for (let i = segment; i < travelData.length - 1; i++) {
+      if (isFlightSegment(travelData[i], travelData[i + 1])) {
+        return i;
+      }
+    }
+    return Math.max(0, travelData.length - 2);
+  };
+
+  const activeSegment = findNextFlightSegment(currentSegment);
+  const currentFrom = travelData[activeSegment];
+  const currentTo = travelData[activeSegment + 1];
 
   return (
     <div className="w-full h-screen bg-black">
@@ -117,22 +136,30 @@ export default function App() {
           <Text position={[0, 0, 1.1]} fontSize={0.1} color="green">
             Z
           </Text> */}
-          {travelData.slice(0, -1).map((_, index) => (
-            <React.Fragment key={index}>
+          {travelData.slice(0, -1).map((from, index) => {
+            const to = travelData[index + 1];
+            if (!isFlightSegment(from, to)) {
+              return null;
+            }
+            const isActive = index === activeSegment;
+            return (
               <FlightPath
-                from={travelData[currentSegment]}
-                to={travelData[currentSegment + 1]}
-                progress={segmentProgress}
+                key={index}
+                from={from}
+                to={to}
+                progress={isActive ? segmentProgress : 0}
                 rotation={rotation}
               />
-            </React.Fragment>
-          ))}
-          <TravelingLight
-            from={currentFrom}
-            to={currentTo}
-            progress={segmentProgress}
-            rotation={rotation}
-          />
+            );
+          })}
+          {isFlightSegment(currentFrom, currentTo) && (
+            <TravelingLight
+              from={currentFrom}
+              to={currentTo}
+              progress={segmentProgress}
+              rotation={rotation}
+            />
+          )}
           <OrbitControls
             enableZoom={true}
             enablePan={true}
