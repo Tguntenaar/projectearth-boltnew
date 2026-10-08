@@ -9,7 +9,7 @@ import {
   MapPin,
   Loader2,
 } from "lucide-react";
-import { travelData } from "../data/travelData";
+import { travelData, isFlightSegment } from "../data/travelData";
 import { calculateDistanceInKm } from "../utils/coordinates";
 
 interface StatsProps {
@@ -20,14 +20,22 @@ interface StatsProps {
 export function Stats({ stats, currentSegment }: StatsProps) {
   const traveledSoFar = travelData
     .slice(0, currentSegment + 1)
-    .reduce((acc, location, i) => {
+    .reduce((acc, _location, i) => {
+      if (i >= travelData.length - 1) {
+        return acc;
+      }
+      const from = travelData[i];
+      const to = travelData[i + 1];
+      if (!isFlightSegment(from, to)) {
+        return acc;
+      }
       return (
         acc +
         calculateDistanceInKm(
-          travelData[i].coordinates[0],
-          travelData[i].coordinates[1],
-          travelData[i + 1].coordinates[0],
-          travelData[i + 1].coordinates[1]
+          from.coordinates[0],
+          from.coordinates[1],
+          to.coordinates[0],
+          to.coordinates[1]
         )
       );
     }, 0);
