@@ -43,6 +43,7 @@ export function GlobeScene({
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
   const [hoveredLeg, setHoveredLeg] = useState<number | null>(null);
   const [autoFollow, setAutoFollow] = useState(true);
+  const [globeRotation, setGlobeRotation] = useState(0);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const scheduleResumeFollow = useCallback(() => {
@@ -76,7 +77,7 @@ export function GlobeScene({
   const activeTo = travelData[activeSegment + 1];
   const showAircraft = isFlightSegment(activeFrom, activeTo);
 
-  const focusPoint = useMemo(() => {
+  const focusLocal = useMemo(() => {
     if (!showAircraft) return new THREE.Vector3(0, 0, 1);
     return getPointOnArc(activeFrom, activeTo, progress).clone();
   }, [activeFrom, activeTo, progress, showAircraft]);
@@ -93,52 +94,54 @@ export function GlobeScene({
         }}
       >
         <Suspense fallback={null}>
-          <group scale={0.92}>
           <SceneLighting />
-          <Stars radius={240} depth={40} count={5000} factor={3.5} fade speed={0.3} />
-          <Earth rotation={0} />
-          <Suspense fallback={null}>
-            <Moon rotation={0} position={[7, 0.4, 0]} />
-          </Suspense>
+          <group scale={0.92}>
+            <Stars radius={240} depth={40} count={5000} factor={3.5} fade speed={0.3} />
+            <group rotation={[0, globeRotation, 0]}>
+              <Earth />
+              <Suspense fallback={null}>
+                <Moon position={[7, 0.4, 0]} />
+              </Suspense>
 
-          {segments.map(({ index, from, to }) => {
-            const isActive = index === activeSegment;
-            const isHovered = hoveredLeg === index;
-            const legYear = Number(to.date.slice(0, 4));
-            const yearMatch = yearFilter === null || legYear === yearFilter;
-            const legProgress = isActive && isPlaying ? progress : isActive ? 1 : 0;
-            return (
-              <FlightArc
-                key={index}
-                from={from}
-                to={to}
-                progress={legProgress}
-                isActive={(isActive || isHovered) && yearMatch}
-                dimmed={!yearMatch}
-                color={colorForDate(to.date)}
-                onPointerOver={() => setHoveredLeg(index)}
-                onPointerOut={() => setHoveredLeg(null)}
-                onClick={() => onLegSelect(index)}
+              {segments.map(({ index, from, to }) => {
+              const isActive = index === activeSegment;
+              const isHovered = hoveredLeg === index;
+              const legYear = Number(to.date.slice(0, 4));
+              const yearMatch = yearFilter === null || legYear === yearFilter;
+              const legProgress = isActive && isPlaying ? progress : isActive ? 1 : 0;
+              return (
+                <FlightArc
+                  key={index}
+                  from={from}
+                  to={to}
+                  progress={legProgress}
+                  isActive={(isActive || isHovered) && yearMatch}
+                  dimmed={!yearMatch}
+                  color={colorForDate(to.date)}
+                  onPointerOver={() => setHoveredLeg(index)}
+                  onPointerOut={() => setHoveredLeg(null)}
+                  onClick={() => onLegSelect(index)}
+                />
+              );
+              })}
+
+              <PlaceMarkers
+                places={travelData}
+                highlightedId={highlightedPlaceId}
+              pinnedId={pinnedPlaceId}
+              onHover={onPlaceHover}
+              onSelect={onPlaceSelect}
               />
-            );
-          })}
 
-          <PlaceMarkers
-            places={travelData}
-            highlightedId={highlightedPlaceId}
-            pinnedId={pinnedPlaceId}
-            onHover={onPlaceHover}
-            onSelect={onPlaceSelect}
-          />
-
-          {showAircraft && (
-            <TravelingAircraft
-              from={activeFrom}
-              to={activeTo}
-              progress={progress}
-              color={colorForDate(activeTo.date)}
-            />
-          )}
+              {showAircraft && (
+                <TravelingAircraft
+                  from={activeFrom}
+                  to={activeTo}
+                  progress={progress}
+                  color={colorForDate(activeTo.date)}
+                />
+              )}
+            </group>
           </group>
 
           <OrbitControls
@@ -157,9 +160,10 @@ export function GlobeScene({
           />
 
           <CameraFollow
-            focusPoint={focusPoint}
+            focusLocal={focusLocal}
             enabled={autoFollow}
-            controlsRef={controlsRef}
+            globeRotation={globeRotation}
+            onGlobeRotation={setGlobeRotation}
           />
         </Suspense>
       </Canvas>

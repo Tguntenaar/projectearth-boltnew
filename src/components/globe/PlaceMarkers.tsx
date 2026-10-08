@@ -1,5 +1,5 @@
 import { TravelLocation } from '../../types/travel';
-import { surfacePoint } from '../../utils/globeMath';
+import { geographicScenePosition, surfacePoint } from '../../utils/globeMath';
 
 interface PlaceMarkersProps {
   places: TravelLocation[];
@@ -20,7 +20,9 @@ export function PlaceMarkers({
     <group>
       {places.map((place) => {
         const isHighlighted = highlightedId === place.id || pinnedId === place.id;
-        const position = surfacePoint(place.coordinates[0], place.coordinates[1], 1.004);
+        const position = geographicScenePosition(
+          surfacePoint(place.coordinates[0], place.coordinates[1], 1.004)
+        );
 
         return (
           <mesh

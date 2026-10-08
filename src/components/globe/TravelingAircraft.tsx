@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { TravelLocation } from '../../types/travel';
-import { getPointOnArc, getTangentOnArc } from '../../utils/globeMath';
+import { geographicScenePosition, getPointOnArc, getTangentOnArc } from '../../utils/globeMath';
 
 interface TravelingAircraftProps {
   from: TravelLocation;
@@ -18,16 +18,21 @@ export function TravelingAircraft({
   color = '#f8fafc',
 }: TravelingAircraftProps) {
   const groupRef = useRef<THREE.Group>(null);
+  const _ahead = new THREE.Vector3();
 
   useFrame(() => {
     if (!groupRef.current) return;
-    const worldPos = getPointOnArc(from, to, progress);
-    const worldTan = getTangentOnArc(from, to, progress);
-    const up = worldPos.clone().normalize();
+    const localPos = getPointOnArc(from, to, progress);
+    const localTan = getTangentOnArc(from, to, progress);
+    const scenePos = geographicScenePosition(localPos);
+    _ahead.copy(localPos).add(localTan.clone().multiplyScalar(0.02));
+    const sceneAhead = geographicScenePosition(_ahead);
+    const sceneTan = sceneAhead.sub(scenePos).normalize();
+    const up = scenePos.clone().normalize();
 
     const matrix = new THREE.Matrix4();
-    matrix.lookAt(worldPos, worldPos.clone().add(worldTan), up);
-    groupRef.current.position.copy(worldPos);
+    matrix.lookAt(scenePos, scenePos.clone().add(sceneTan), up);
+    groupRef.current.position.copy(scenePos);
     groupRef.current.quaternion.setFromRotationMatrix(matrix);
   });
 

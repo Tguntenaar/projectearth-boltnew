@@ -5,11 +5,33 @@ import { calculateDistance, latLongToVector3, scaleValue } from './coordinates';
 const EARTH_RADIUS = 1;
 
 /** Match the globe mesh spin applied in the scene. */
-export function applyEarthSpin(point: THREE.Vector3, rotation: number): THREE.Vector3 {
-  const rotated = point.clone();
+export function applyEarthSpin(
+  point: THREE.Vector3,
+  rotation: number,
+  target?: THREE.Vector3
+): THREE.Vector3 {
+  const rotated = target ?? point.clone();
+  if (target) {
+    rotated.copy(point);
+  }
   rotated.applyAxisAngle(new THREE.Vector3(0, -1, 0), rotation);
   rotated.x = -rotated.x;
   return rotated;
+}
+
+/** Position in the rotating globe group (X-flip only; parent group applies Y spin). */
+export function geographicScenePosition(
+  point: THREE.Vector3,
+  target?: THREE.Vector3
+): THREE.Vector3 {
+  return applyEarthSpin(point, 0, target);
+}
+
+/** Z component after parent globe group rotation (camera looks down +Z). */
+export function worldZAfterGlobeSpin(local: THREE.Vector3, rotation: number): number {
+  const sx = -local.x;
+  const sz = local.z;
+  return -Math.sin(rotation) * sx + Math.cos(rotation) * sz;
 }
 
 export function surfacePoint(lat: number, lng: number, radius = EARTH_RADIUS): THREE.Vector3 {

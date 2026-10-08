@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Line } from '@react-three/drei';
 import { TravelLocation } from '../../types/travel';
-import { sampleGreatCircleArc } from '../../utils/globeMath';
+import { geographicScenePosition, sampleGreatCircleArc } from '../../utils/globeMath';
 import { colorForDate } from '../../utils/yearColors';
 
 interface FlightArcProps {
@@ -31,10 +31,11 @@ export function FlightArc({
 
   const { fullPath, traveledPath } = useMemo(() => {
     const samples = sampleGreatCircleArc(from, to, 80);
-    const traveledCount = Math.max(2, Math.floor(progress * (samples.length - 1)) + 1);
+    const path = samples.map((p) => geographicScenePosition(p));
+    const traveledCount = Math.max(2, Math.floor(progress * (path.length - 1)) + 1);
     return {
-      fullPath: samples,
-      traveledPath: samples.slice(0, traveledCount),
+      fullPath: path,
+      traveledPath: path.slice(0, traveledCount),
     };
   }, [from, to, progress]);
 
