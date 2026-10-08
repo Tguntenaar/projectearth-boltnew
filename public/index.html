@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Flight Atlas · Thomas Guntenaar</title>
+    <meta
+      name="description"
+      content="An interactive 3D map of Thomas Guntenaar's flights from 2022 to 2026 — routes, stats, and timeline."
+    />
+    <meta name="theme-color" content="#050816" />
+    <link rel="canonical" href="https://flights.thomasguntenaar.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Flight Atlas" />
+    <meta property="og:title" content="Flight Atlas · Thomas Guntenaar" />
+    <meta
+      property="og:description"
+      content="Explore 90+ flights on a spinning globe with timeline playback and travel stats."
+    />
+    <meta property="og:url" content="https://flights.thomasguntenaar.com/" />
+    <meta property="og:image" content="https://flights.thomasguntenaar.com/og-image.jpg" />
+    <meta property="og:image:secure_url" content="https://flights.thomasguntenaar.com/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Flight Atlas — interactive 3D globe of personal flight routes" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://flights.thomasguntenaar.com/og-image.jpg" />
+    <meta name="twitter:image:alt" content="Flight Atlas — interactive 3D globe of personal flight routes" />
+    <meta name="twitter:title" content="Flight Atlas · Thomas Guntenaar" />
+    <meta
+      name="twitter:description"
+      content="Interactive personal flight history on a 3D globe."
+    />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #050816;
+        --panel: #0b1023;
+        --line: #1e2742;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --accent: #7dd3fc;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: var(--bg); color: var(--text); }
+      body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 32px 16px;
+        font: 16px/1.55 'DM Sans', system-ui, sans-serif;
+      }
+      main { width: 100%; max-width: 760px; }
+      .eyebrow {
+        margin: 0;
+        font-size: 12px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      h1 {
+        margin: 6px 0 8px;
+        font: 600 clamp(36px, 7vw, 56px)/1.05 'Fraunces', Georgia, serif;
+      }
+      .lede { margin: 0 0 24px; color: var(--muted); }
+      .card {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1200 / 630;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--panel);
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 24px;
+        padding: 12px 20px;
+        border-radius: 999px;
+        background: var(--text);
+        color: var(--bg);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .cta:hover { background: #fff; }
+      .cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .note { margin: 14px 0 0; font-size: 14px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Thomas Guntenaar</p>
+      <h1>Flight Atlas</h1>
+      <p class="lede">Every flight since 2022 on a 3D globe, with timeline playback and travel stats.</p>
+      <img
+        class="card"
+        src="/og-image.jpg"
+        width="1200"
+        height="630"
+        alt="Flight Atlas — interactive 3D globe of personal flight routes"
+      />
+      <a class="cta" href="/atlas/">Sign in to view <span aria-hidden="true">→</span></a>
+      <p class="note">
+        You'll get a one-time code by email. Use a Gmail, Outlook, iCloud, Yahoo, Proton or
+        Dutch ISP address; throwaway inboxes aren't accepted.
+      </p>
+    </main>
+  </body>
+</html>
