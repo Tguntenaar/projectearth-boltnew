@@ -192,14 +192,14 @@ export default function App() {
                   'Follow Starship with Earth in the background.',
                 ],
                 [
-                  'aircraft',
-                  'Behind the plane',
-                  'Chase the current flight from just behind it.',
-                ],
-                [
                   'overhead',
                   'Above the plane',
                   'Look straight down on the plane, north up.',
+                ],
+                [
+                  'aircraft',
+                  'Behind the plane',
+                  'Chase the current flight from just behind it.',
                 ],
               ] as const
             ).map(([value, label, description]) => (
@@ -323,28 +323,28 @@ export default function App() {
                 following ? 'bg-sky-200/15 text-sky-100' : 'bg-white/5'
               }`}
               aria-label={
-                cameraView === 'aircraft'
-                  ? 'Following behind the plane. Switch to above the plane'
-                  : cameraView === 'overhead'
-                    ? 'Following above the plane. Stop following'
+                cameraView === 'overhead'
+                  ? 'Following above the plane. Switch to behind the plane'
+                  : cameraView === 'aircraft'
+                    ? 'Following behind the plane. Stop following'
                     : 'Follow the plane'
               }
               aria-pressed={following}
               title={
-                cameraView === 'aircraft'
-                  ? 'Behind the plane · tap for above'
-                  : cameraView === 'overhead'
-                    ? 'Above the plane · tap to stop'
+                cameraView === 'overhead'
+                  ? 'Above the plane · tap for behind'
+                  : cameraView === 'aircraft'
+                    ? 'Behind the plane · tap to stop'
                     : 'Follow the plane'
               }
-              // Cycles: off -> behind the plane -> above the plane -> off.
+              // Cycles: off -> above the plane (default) -> behind the plane -> off.
               onClick={() =>
                 setCameraView((v) =>
-                  v === 'aircraft'
-                    ? 'overhead'
-                    : v === 'overhead'
+                  v === 'overhead'
+                    ? 'aircraft'
+                    : v === 'aircraft'
                       ? 'earth'
-                      : 'aircraft',
+                      : 'overhead',
                 )
               }
             >
